@@ -27,20 +27,32 @@ class _DashBoardState extends State<DashBoard> {
   final player = AudioPlayer();
   Timer? timer;
   int maxAttempts = 5;
+  late Container adContainer;
 
   @override
   void initState() {
     super.initState();
-    MobileAds.instance.initialize();
-
     player.setUrl(bgMusic);
     player.play();
     timer = Timer.periodic(
         const Duration(milliseconds: 8500), (Timer t) => sayHi());
-    loadStaticBannerAd();
-    loadInlineBannerAd();
-    //   createInterstialAd();
-    //   createRewardedAd();
+    loadAbcReadingInterAd();
+    loadAbcWritingInterAd();
+    loadNumberReadingAd();
+    loadNumberWritingAd();
+    AtoZLoadingAd();
+    colorLoadingAd();
+    myBanner.load();
+    final AdWidget adWidget = AdWidget(ad: myBanner);
+    adContainer = Container(
+      alignment: Alignment.center,
+      child: adWidget,
+      width: myBanner.size.width.toDouble(),
+      height: myBanner.size.height.toDouble(),
+    );
+    Future.delayed(const Duration(seconds: 60), () {
+      abcReadingInter.show();
+    });
   }
 
   sayHi() {
@@ -56,152 +68,6 @@ class _DashBoardState extends State<DashBoard> {
     });
   }
 
-  late BannerAd staticAd;
-  bool staticAdLoaded = false;
-  late BannerAd inlineAd;
-  bool inlineAdLoaded = false;
-
-  InterstitialAd? interstitialAd;
-  int interstitialAttempts = 0;
-
-  RewardedAd? rewardedAd;
-  int rewardedAdAttempts = 0;
-
-  ///Ad request settings
-  static const AdRequest request = AdRequest(
-      // keywords: ['', ''],
-      // contentUrl: '',
-      // nonPersonalizedAds: false
-      );
-
-  ///function to load static banner ad
-  void loadStaticBannerAd() {
-    staticAd = BannerAd(
-        adUnitId: 'ca-app-pub-5525086149175557/2147382119',
-        size: AdSize.banner,
-        request: request,
-        listener: BannerAdListener(onAdLoaded: (ad) {
-          setState(() {
-            staticAdLoaded = true;
-          });
-        }, onAdFailedToLoad: (ad, error) {
-          ad.dispose();
-
-          print('ad failed to load ${error.message}');
-        }));
-
-    staticAd.load();
-  }
-
-  ///function to load inline banner ad
-  void loadInlineBannerAd() {
-    inlineAd = BannerAd(
-        adUnitId: 'ca-app-pub-5525086149175557/2147382119',
-        size: AdSize.banner,
-        request: request,
-        listener: BannerAdListener(onAdLoaded: (ad) {
-          setState(() {
-            inlineAdLoaded = true;
-          });
-        }, onAdFailedToLoad: (ad, error) {
-          ad.dispose();
-
-          print('ad failed to load ${error.message}');
-        }));
-
-    inlineAd.load();
-  }
-
-  ///function to create Interstitial ad
-  void createInterstialAd() {
-    InterstitialAd.load(
-        adUnitId: InterstitialAd.testAdUnitId,
-        request: request,
-        adLoadCallback: InterstitialAdLoadCallback(onAdLoaded: (ad) {
-          interstitialAd = ad;
-          interstitialAttempts = 0;
-        }, onAdFailedToLoad: (error) {
-          interstitialAttempts++;
-          interstitialAd = null;
-          print('falied to load ${error.message}');
-
-          if (interstitialAttempts <= maxAttempts) {
-            createInterstialAd();
-          }
-        }));
-  }
-
-  ///function to show the Interstitial ad after loading it
-  ///this function will get called when we click on the button
-  void showInterstitialAd() {
-    if (interstitialAd == null) {
-      print('trying to show before loading');
-      return;
-    }
-
-    interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
-        onAdShowedFullScreenContent: (ad) => print('ad showed $ad'),
-        onAdDismissedFullScreenContent: (ad) {
-          ad.dispose();
-          createInterstialAd();
-        },
-        onAdFailedToShowFullScreenContent: (ad, error) {
-          ad.dispose();
-          print('failed to show the ad $ad');
-
-          createInterstialAd();
-        });
-
-    interstitialAd!.show();
-    interstitialAd = null;
-  }
-
-  ///function to create rewarded ad
-  void createRewardedAd() {
-    RewardedAd.load(
-        adUnitId: RewardedAd.testAdUnitId,
-        request: request,
-        rewardedAdLoadCallback: RewardedAdLoadCallback(onAdLoaded: (ad) {
-          rewardedAd = ad;
-          rewardedAdAttempts = 0;
-        }, onAdFailedToLoad: (error) {
-          rewardedAdAttempts++;
-          rewardedAd = null;
-          print('failed to load ${error.message}');
-
-          if (rewardedAdAttempts <= maxAttempts) {
-            createRewardedAd();
-          }
-        }));
-  }
-
-  ///function to show the rewarded ad after loading it
-  ///this function will get called when we click on the button
-  void showRewardedAd() {
-    if (rewardedAd == null) {
-      print('trying to show before loading');
-      return;
-    }
-
-    rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
-        onAdShowedFullScreenContent: (ad) => print('ad showed $ad'),
-        onAdDismissedFullScreenContent: (ad) {
-          ad.dispose();
-          createRewardedAd();
-        },
-        onAdFailedToShowFullScreenContent: (ad, error) {
-          ad.dispose();
-          print('failed to show the ad $ad');
-
-          createRewardedAd();
-        });
-
-    rewardedAd!.show(onUserEarnedReward: (ad, reward) {
-      print('reward video ${reward.amount} ${reward.type}');
-    });
-    rewardedAd = null;
-  }
-
   _launchURL() async {
     if (await canLaunch(
         "https://sites.google.com/view/childreneducationapp/home")) {
@@ -211,13 +77,168 @@ class _DashBoardState extends State<DashBoard> {
     }
   }
 
+  final BannerAd myBanner = BannerAd(
+    adUnitId: 'ca-app-pub-3940256099942544/6300978111',
+    size: AdSize.banner,
+    request: AdRequest(),
+    listener: BannerAdListener(),
+  );
+
+  late InterstitialAd abcReadingInter;
+
+  void loadAbcReadingInterAd() {
+    InterstitialAd.load(
+      adUnitId: "ca-app-pub-3940256099942544/1033173712",
+      request: AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (ad) {},
+          );
+          setState(() {
+            abcReadingInter = ad;
+          });
+        },
+        onAdFailedToLoad: (err) {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const ABCReading()));
+          print('Failed to load an interstitial ad: ${err.message}');
+        },
+      ),
+    );
+  }
+
+  late InterstitialAd abcWritingInter;
+
+  void loadAbcWritingInterAd() {
+    InterstitialAd.load(
+      adUnitId: "ca-app-pub-3940256099942544/1033173712",
+      request: AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (ad) {},
+          );
+          setState(() {
+            abcWritingInter = ad;
+          });
+        },
+        onAdFailedToLoad: (err) {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const ABCReading()));
+          print('Failed to load an interstitial ad: ${err.message}');
+        },
+      ),
+    );
+  }
+
+  late InterstitialAd numberReading;
+
+  void loadNumberReadingAd() {
+    InterstitialAd.load(
+      adUnitId: "ca-app-pub-3940256099942544/1033173712",
+      request: AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (ad) {},
+          );
+          setState(() {
+            numberReading = ad;
+          });
+        },
+        onAdFailedToLoad: (err) {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const OneTwoThreeReading()));
+          print('Failed to load an interstitial ad: ${err.message}');
+        },
+      ),
+    );
+  }
+
+  late InterstitialAd numberWriting;
+
+  void loadNumberWritingAd() {
+    InterstitialAd.load(
+      adUnitId: "ca-app-pub-3940256099942544/1033173712",
+      request: AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (ad) {},
+          );
+          setState(() {
+            numberWriting = ad;
+          });
+        },
+        onAdFailedToLoad: (err) {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const OneTwoThreeWriting()));
+          print('Failed to load an interstitial ad: ${err.message}');
+        },
+      ),
+    );
+  }
+
+  late InterstitialAd aTozInter;
+
+  void AtoZLoadingAd() {
+    InterstitialAd.load(
+      adUnitId: "ca-app-pub-3940256099942544/1033173712",
+      request: AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (ad) {},
+          );
+          setState(() {
+            aTozInter = ad;
+          });
+        },
+        onAdFailedToLoad: (err) {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const WordsReading()));
+          print('Failed to load an interstitial ad: ${err.message}');
+        },
+      ),
+    );
+  }
+
+  late InterstitialAd colorInter;
+
+  void colorLoadingAd() {
+    InterstitialAd.load(
+      adUnitId: "ca-app-pub-3940256099942544/1033173712",
+      request: AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (ad) {},
+          );
+          setState(() {
+            colorInter = ad;
+          });
+        },
+        onAdFailedToLoad: (err) {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const ColorsName()));
+          print('Failed to load an interstitial ad: ${err.message}');
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         leading: GestureDetector(
-          onTap: ()=> {_launchURL()},
+          onTap: () => {_launchURL()},
           child: const Icon(
             Icons.info_outline,
             color: Colors.green,
@@ -272,392 +293,391 @@ class _DashBoardState extends State<DashBoard> {
         ],
       ),
       body: Center(
-        child: Stack(
+        child: Column(
           children: [
-            Column(
-              children: [
-                Container(
-                  height: MediaQuery.of(context).size.height / 9,
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.shade400,
-                        offset: const Offset(0.0, 1.0), //(x,y)
-                        blurRadius: 6.0,
+            Container(
+              height: MediaQuery.of(context).size.height / 9,
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.shade400,
+                    offset: const Offset(0.0, 1.0), //(x,y)
+                    blurRadius: 6.0,
+                  ),
+                ],
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(25.0),
+                  bottomRight: Radius.circular(25.0),
+                ),
+                color: Colors.white,
+              ),
+              child: Center(
+                child: Stack(
+                  children: [
+                    DelayedDisplay(
+                      delay: const Duration(seconds: 1),
+                      slidingBeginOffset: const Offset(0.0, 1),
+                      child: Image.network(
+                        "https://firebasestorage.googleapis.com/v0/b/chlidren-education.appspot.com/o/Gifs%2Fwave1.gif?alt=media&token=2898af2b-16f7-4c28-9512-e271a3f7b89b",
+                        fit: BoxFit.contain,
+                        scale: 2,
                       ),
-                    ],
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(25.0),
-                      bottomRight: Radius.circular(25.0),
                     ),
-                    color: Colors.white,
-                  ),
-                  child: Center(
-                    child: Stack(
-                      children: [
-                        DelayedDisplay(
-                          delay: const Duration(seconds: 1),
-                          slidingBeginOffset: const Offset(0.0, 1),
-                          child: Image.network(
-                            "https://firebasestorage.googleapis.com/v0/b/chlidren-education.appspot.com/o/Gifs%2Fwave1.gif?alt=media&token=2898af2b-16f7-4c28-9512-e271a3f7b89b",
-                            fit: BoxFit.contain,
-                            scale: 2,
-                          ),
-                        ),
-                        Positioned(
-                            left: 170,
-                            top: 25,
-                            child: Text(
-                              hiText ? "Hi" : "",
-                              style: const TextStyle(
-                                  color: Colors.blue,
-                                  fontFamily: 'cutes',
-                                  fontSize: 20),
-                            )),
-                      ],
+                    Positioned(
+                      left: 170,
+                      top: 25,
+                      child: Text(
+                        hiText ? "Hi" : "",
+                        style: const TextStyle(
+                            color: Colors.blue,
+                            fontFamily: 'cutes',
+                            fontSize: 20),
+                      ),
                     ),
-                  ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 8, left: 2, right: 2),
-                    child: GridView.count(
-                      crossAxisCount: 2,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              player.stop();
-                            });
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const ABCReading()));
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                                left: 8, right: 4, top: 8, bottom: 4),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.shade400,
-                                    offset: const Offset(0.0, 1.0), //(x,y)
-                                    blurRadius: 6.0,
-                                  ),
-                                ],
-                                borderRadius: const BorderRadius.only(
-                                  bottomLeft: Radius.circular(10.0),
-                                  bottomRight: Radius.circular(10.0),
-                                  topRight: Radius.circular(10.0),
-                                  topLeft: Radius.circular(10.0),
-                                ),
-                                color: Colors.white,
-                              ),
-                              width: MediaQuery.of(context).size.width / 2.5,
-                              height: MediaQuery.of(context).size.height / 3.8,
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  children: [
-                                    Image.asset(
-                                      "images/abc1.jpg",
-                                      scale: 15,
-                                    ),
-                                    const Text(
-                                      "Reading Letters",
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.deepOrange),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              player.stop();
-                            });
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const ABCWriting()));
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                                left: 4, right: 8, top: 8, bottom: 4),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.shade400,
-                                    offset: const Offset(0.0, 1.0), //(x,y)
-                                    blurRadius: 6.0,
-                                  ),
-                                ],
-                                borderRadius: const BorderRadius.only(
-                                  bottomLeft: Radius.circular(10.0),
-                                  bottomRight: Radius.circular(10.0),
-                                  topRight: Radius.circular(10.0),
-                                  topLeft: Radius.circular(10.0),
-                                ),
-                                color: Colors.white,
-                              ),
-                              width: MediaQuery.of(context).size.width / 2.5,
-                              height: MediaQuery.of(context).size.height / 3.8,
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  children: [
-                                    Image.asset(
-                                      "images/abc2.jpg",
-                                      scale: 15,
-                                    ),
-                                    const Text(
-                                      "Writing Letters",
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.green),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              player.stop();
-                            });
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const OneTwoThreeReading()));
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                                left: 8, right: 4, top: 8, bottom: 4),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.shade400,
-                                    offset: const Offset(0.0, 1.0), //(x,y)
-                                    blurRadius: 6.0,
-                                  ),
-                                ],
-                                borderRadius: const BorderRadius.only(
-                                  bottomLeft: Radius.circular(10.0),
-                                  bottomRight: Radius.circular(10.0),
-                                  topRight: Radius.circular(10.0),
-                                  topLeft: Radius.circular(10.0),
-                                ),
-                                color: Colors.white,
-                              ),
-                              width: MediaQuery.of(context).size.width / 2.5,
-                              height: MediaQuery.of(context).size.height / 3.8,
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  children: [
-                                    Image.asset(
-                                      "images/123a.jpg",
-                                      scale: 15,
-                                    ),
-                                    const Text(
-                                      "Reading Numbers",
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.blue),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              player.stop();
-                            });
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const OneTwoThreeWriting()));
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                                left: 4, right: 8, top: 8, bottom: 4),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.shade400,
-                                    offset: const Offset(0.0, 1.0), //(x,y)
-                                    blurRadius: 6.0,
-                                  ),
-                                ],
-                                borderRadius: const BorderRadius.only(
-                                  bottomLeft: Radius.circular(10.0),
-                                  bottomRight: Radius.circular(10.0),
-                                  topRight: Radius.circular(10.0),
-                                  topLeft: Radius.circular(10.0),
-                                ),
-                                color: Colors.white,
-                              ),
-                              width: MediaQuery.of(context).size.width / 2.5,
-                              height: MediaQuery.of(context).size.height / 3.8,
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  children: [
-                                    Image.asset(
-                                      "images/123Board.jpg",
-                                      scale: 15,
-                                    ),
-                                    const Text(
-                                      "Writing Numbers",
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.deepPurpleAccent),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              player.stop();
-                            });
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const WordsReading()));
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                                left: 8, right: 4, top: 8, bottom: 4),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.shade400,
-                                    offset: const Offset(0.0, 1.0), //(x,y)
-                                    blurRadius: 6.0,
-                                  ),
-                                ],
-                                borderRadius: const BorderRadius.only(
-                                  bottomLeft: Radius.circular(10.0),
-                                  bottomRight: Radius.circular(10.0),
-                                  topRight: Radius.circular(10.0),
-                                  topLeft: Radius.circular(10.0),
-                                ),
-                                color: Colors.white,
-                              ),
-                              width: MediaQuery.of(context).size.width / 2.5,
-                              height: MediaQuery.of(context).size.height / 3.8,
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  children: [
-                                    Image.asset(
-                                      "images/AforApple.jpg",
-                                      scale: 15,
-                                    ),
-                                    const Text(
-                                      "A-Z Words",
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.pinkAccent),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              player.stop();
-                            });
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const ColorsName()));
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                                left: 4, right: 8, top: 8, bottom: 4),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.shade400,
-                                    offset: const Offset(0.0, 1.0), //(x,y)
-                                    blurRadius: 6.0,
-                                  ),
-                                ],
-                                borderRadius: const BorderRadius.only(
-                                  bottomLeft: Radius.circular(10.0),
-                                  bottomRight: Radius.circular(10.0),
-                                  topRight: Radius.circular(10.0),
-                                  topLeft: Radius.circular(10.0),
-                                ),
-                                color: Colors.white,
-                              ),
-                              width: MediaQuery.of(context).size.width / 2.5,
-                              height: MediaQuery.of(context).size.height / 3.8,
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  children: [
-                                    Image.asset(
-                                      "images/colorsBoard.jpg",
-                                      scale: 15,
-                                    ),
-                                    const Text(
-                                      "Colors Name",
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.indigo),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            if (staticAdLoaded)
-              Positioned(
-                bottom: 0.0,
-                left: 0.0,
-                right: 0.0,
-                child: Container(
-                  child: AdWidget(
-                    ad: staticAd,
-                  ),
-                  width: staticAd.size.width.toDouble(),
-                  height: staticAd.size.height.toDouble(),
+                  ],
                 ),
               ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8, left: 2, right: 2),
+                child: GridView.count(
+                  crossAxisCount: 2,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          player.stop();
+                        });
+                        abcReadingInter.show();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ABCReading(),
+                          ),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                            left: 8, right: 4, top: 8, bottom: 4),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.shade400,
+                                offset: const Offset(0.0, 1.0), //(x,y)
+                                blurRadius: 6.0,
+                              ),
+                            ],
+                            borderRadius: const BorderRadius.only(
+                              bottomLeft: Radius.circular(10.0),
+                              bottomRight: Radius.circular(10.0),
+                              topRight: Radius.circular(10.0),
+                              topLeft: Radius.circular(10.0),
+                            ),
+                            color: Colors.white,
+                          ),
+                          width: MediaQuery.of(context).size.width / 2.5,
+                          height: MediaQuery.of(context).size.height / 3.8,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                Image.asset(
+                                  "images/abc1.jpg",
+                                  scale: 15,
+                                ),
+                                const Text(
+                                  "Reading Letters",
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.deepOrange),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          player.stop();
+                        });
+                        abcWritingInter.show();
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const ABCWriting()));
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                            left: 4, right: 8, top: 8, bottom: 4),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.shade400,
+                                offset: const Offset(0.0, 1.0), //(x,y)
+                                blurRadius: 6.0,
+                              ),
+                            ],
+                            borderRadius: const BorderRadius.only(
+                              bottomLeft: Radius.circular(10.0),
+                              bottomRight: Radius.circular(10.0),
+                              topRight: Radius.circular(10.0),
+                              topLeft: Radius.circular(10.0),
+                            ),
+                            color: Colors.white,
+                          ),
+                          width: MediaQuery.of(context).size.width / 2.5,
+                          height: MediaQuery.of(context).size.height / 3.8,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                Image.asset(
+                                  "images/abc2.jpg",
+                                  scale: 15,
+                                ),
+                                const Text(
+                                  "Writing Letters",
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.green),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          player.stop();
+                        });
+                        numberReading.show();
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const OneTwoThreeReading()));
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                            left: 8, right: 4, top: 8, bottom: 4),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.shade400,
+                                offset: const Offset(0.0, 1.0), //(x,y)
+                                blurRadius: 6.0,
+                              ),
+                            ],
+                            borderRadius: const BorderRadius.only(
+                              bottomLeft: Radius.circular(10.0),
+                              bottomRight: Radius.circular(10.0),
+                              topRight: Radius.circular(10.0),
+                              topLeft: Radius.circular(10.0),
+                            ),
+                            color: Colors.white,
+                          ),
+                          width: MediaQuery.of(context).size.width / 2.5,
+                          height: MediaQuery.of(context).size.height / 3.8,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                Image.asset(
+                                  "images/123a.jpg",
+                                  scale: 15,
+                                ),
+                                const Text(
+                                  "Reading Numbers",
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.blue),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          player.stop();
+                        });
+                        numberWriting.show();
+
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const OneTwoThreeWriting()));
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                            left: 4, right: 8, top: 8, bottom: 4),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.shade400,
+                                offset: const Offset(0.0, 1.0), //(x,y)
+                                blurRadius: 6.0,
+                              ),
+                            ],
+                            borderRadius: const BorderRadius.only(
+                              bottomLeft: Radius.circular(10.0),
+                              bottomRight: Radius.circular(10.0),
+                              topRight: Radius.circular(10.0),
+                              topLeft: Radius.circular(10.0),
+                            ),
+                            color: Colors.white,
+                          ),
+                          width: MediaQuery.of(context).size.width / 2.5,
+                          height: MediaQuery.of(context).size.height / 3.8,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                Image.asset(
+                                  "images/123Board.jpg",
+                                  scale: 15,
+                                ),
+                                const Text(
+                                  "Writing Numbers",
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.deepPurpleAccent),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          player.stop();
+                        });
+                        aTozInter.show();
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const WordsReading()));
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                            left: 8, right: 4, top: 8, bottom: 4),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.shade400,
+                                offset: const Offset(0.0, 1.0), //(x,y)
+                                blurRadius: 6.0,
+                              ),
+                            ],
+                            borderRadius: const BorderRadius.only(
+                              bottomLeft: Radius.circular(10.0),
+                              bottomRight: Radius.circular(10.0),
+                              topRight: Radius.circular(10.0),
+                              topLeft: Radius.circular(10.0),
+                            ),
+                            color: Colors.white,
+                          ),
+                          width: MediaQuery.of(context).size.width / 2.5,
+                          height: MediaQuery.of(context).size.height / 3.8,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                Image.asset(
+                                  "images/AforApple.jpg",
+                                  scale: 15,
+                                ),
+                                const Text(
+                                  "A-Z Words",
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.pinkAccent),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          player.stop();
+                        });
+                        colorInter.show();
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const ColorsName()));
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                            left: 4, right: 8, top: 8, bottom: 4),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.shade400,
+                                offset: const Offset(0.0, 1.0), //(x,y)
+                                blurRadius: 6.0,
+                              ),
+                            ],
+                            borderRadius: const BorderRadius.only(
+                              bottomLeft: Radius.circular(10.0),
+                              bottomRight: Radius.circular(10.0),
+                              topRight: Radius.circular(10.0),
+                              topLeft: Radius.circular(10.0),
+                            ),
+                            color: Colors.white,
+                          ),
+                          width: MediaQuery.of(context).size.width / 2.5,
+                          height: MediaQuery.of(context).size.height / 3.8,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                Image.asset(
+                                  "images/colorsBoard.jpg",
+                                  scale: 15,
+                                ),
+                                const Text(
+                                  "Colors Name",
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.indigo),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                alignment: Alignment.bottomCenter,
+                child: adContainer,
+              ),
+            ),
           ],
         ),
       ),
