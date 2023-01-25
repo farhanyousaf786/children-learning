@@ -23,53 +23,57 @@ class _OneTwoThreeReadingState extends State<OneTwoThreeReading> {
     player.play();
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Writing Practice'),
+
+        title: const Text('Reading 123'),
         centerTitle: true,
       ),
       body: Center(
         child: GridView.count(
           crossAxisCount: 2,
-          children: List.generate(100, (index) {
-            return GestureDetector(
-              onTap: () {
-
-                player.setAsset("assets/countingVoice/en_num_${index+1}.mp3");
-                player.play();
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                        width: 6,
+          children: List.generate(
+            100,
+            (index) {
+              return GestureDetector(
+                onTap: () {
+                  player
+                      .setAsset("assets/countingVoice/en_num_${index + 1}.mp3");
+                  player.play();
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                          width: 6,
+                          color: Colors.primaries[
+                              Random().nextInt(Colors.primaries.length)],
+                        ),
+                        borderRadius: BorderRadius.circular(15)),
+                    child: Center(
+                        child: Text(
+                      "${index + 1}",
+                      style: TextStyle(
+                        shadows:
+                            dataBase.outlinedText(strokeColor: Colors.black),
+                        fontSize: 120,
+                        fontFamily: 'sunny',
                         color: Colors.primaries[
                             Random().nextInt(Colors.primaries.length)],
                       ),
-                      borderRadius: BorderRadius.circular(15)),
-                  child: Center(
-                      child: Text(
-                    "${index + 1}",
-                    style: TextStyle(
-                      shadows: dataBase.outlinedText(strokeColor: Colors.black),
-                      fontSize: 120,
-                      fontFamily: 'sunny',
-                      color: Colors
-                          .primaries[Random().nextInt(Colors.primaries.length)],
-                    ),
-                  )),
+                    )),
+                  ),
                 ),
-              ),
-            );
-          }),
+              );
+            },
+          ),
         ),
       ),
     );
   }
-
-
 }

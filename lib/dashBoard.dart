@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:children_learning/123Reading/123Reading.dart';
 import 'package:children_learning/123Writing/123Writing.dart';
 import 'package:children_learning/ColorsName/colorsName.dart';
@@ -10,6 +9,7 @@ import 'package:delayed_display/delayed_display.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DashBoard extends StatefulWidget {
@@ -38,10 +38,10 @@ class _DashBoardState extends State<DashBoard> {
         const Duration(milliseconds: 8500), (Timer t) => sayHi());
     loadAbcReadingInterAd();
     loadAbcWritingInterAd();
-    loadNumberReadingAd();
+    // loadNumberReadingAd();
     loadNumberWritingAd();
     AtoZLoadingAd();
-    colorLoadingAd();
+    // colorLoadingAd();
     myBanner.load();
     final AdWidget adWidget = AdWidget(ad: myBanner);
     adContainer = Container(
@@ -53,8 +53,84 @@ class _DashBoardState extends State<DashBoard> {
     Future.delayed(const Duration(seconds: 60), () {
       abcReadingInter.show();
     });
+    notify();
   }
 
+  notify() async {
+    SharedPreferences? prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey("internet")) {
+      print("existssssssssssssssssssssss");
+    } else {
+      bottomBar();
+    }
+  }
+
+  bottomBar() {
+    return showModalBottomSheet(
+        useRootNavigator: true,
+        isScrollControlled: true,
+        barrierColor: Colors.red.withOpacity(0.2),
+        elevation: 0,
+        clipBehavior: Clip.antiAliasWithSaveLayer,
+        context: context,
+        builder: (context) {
+          return Container(
+            height: MediaQuery.of(context).size.height / 3,
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Container(
+                    child: Padding(
+                      padding: const EdgeInsets.all(5.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.linear_scale_sharp,
+                            color: Colors.white,
+                          ),
+                        ],
+                      ),
+                    ),
+                    color: Colors.green,
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.all(12.0),
+                    child: Center(
+                      child: Text(
+                        "Important Note",
+                        style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red),
+                      ),
+                    ),
+                  ),
+                  const Center(
+                    child: Text(
+                      "Wifi or Internet is Necessary for better Experience",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 18, color: Colors.green),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: ElevatedButton(
+                        onPressed: () => {
+
+                        },
+                        child: const Text("Never Show Again")),
+                  )
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+
+  neverShowAgain(){}
   sayHi() {
     if (hiText) {
       setState(() {
@@ -78,17 +154,16 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   final BannerAd myBanner = BannerAd(
-    adUnitId: 'ca-app-pub-3940256099942544/6300978111',
+    adUnitId: 'ca-app-pub-5525086149175557/5317491428',
     size: AdSize.banner,
     request: AdRequest(),
     listener: BannerAdListener(),
   );
-
   late InterstitialAd abcReadingInter;
 
   void loadAbcReadingInterAd() {
     InterstitialAd.load(
-      adUnitId: "ca-app-pub-3940256099942544/1033173712",
+      adUnitId: "ca-app-pub-5525086149175557/3238107087",
       request: AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (ad) {
@@ -112,7 +187,7 @@ class _DashBoardState extends State<DashBoard> {
 
   void loadAbcWritingInterAd() {
     InterstitialAd.load(
-      adUnitId: "ca-app-pub-3940256099942544/1033173712",
+      adUnitId: "ca-app-pub-5525086149175557/4527988080",
       request: AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (ad) {
@@ -132,37 +207,36 @@ class _DashBoardState extends State<DashBoard> {
     );
   }
 
-  late InterstitialAd numberReading;
-
-  void loadNumberReadingAd() {
-    InterstitialAd.load(
-      adUnitId: "ca-app-pub-3940256099942544/1033173712",
-      request: AdRequest(),
-      adLoadCallback: InterstitialAdLoadCallback(
-        onAdLoaded: (ad) {
-          ad.fullScreenContentCallback = FullScreenContentCallback(
-            onAdDismissedFullScreenContent: (ad) {},
-          );
-          setState(() {
-            numberReading = ad;
-          });
-        },
-        onAdFailedToLoad: (err) {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const OneTwoThreeReading()));
-          print('Failed to load an interstitial ad: ${err.message}');
-        },
-      ),
-    );
-  }
+  // late InterstitialAd numberReading;
+  // void loadNumberReadingAd() {
+  //   InterstitialAd.load(
+  //     adUnitId: "ca-app-pub-3940256099942544/1033173712",
+  //     request: AdRequest(),
+  //     adLoadCallback: InterstitialAdLoadCallback(
+  //       onAdLoaded: (ad) {
+  //         ad.fullScreenContentCallback = FullScreenContentCallback(
+  //           onAdDismissedFullScreenContent: (ad) {},
+  //         );
+  //         setState(() {
+  //           numberReading = ad;
+  //         });
+  //       },
+  //       onAdFailedToLoad: (err) {
+  //         Navigator.push(
+  //             context,
+  //             MaterialPageRoute(
+  //                 builder: (context) => const OneTwoThreeReading()));
+  //         print('Failed to load an interstitial ad: ${err.message}');
+  //       },
+  //     ),
+  //   );
+  // }
 
   late InterstitialAd numberWriting;
 
   void loadNumberWritingAd() {
     InterstitialAd.load(
-      adUnitId: "ca-app-pub-3940256099942544/1033173712",
+      adUnitId: "ca-app-pub-5525086149175557/6985780408",
       request: AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (ad) {
@@ -188,7 +262,7 @@ class _DashBoardState extends State<DashBoard> {
 
   void AtoZLoadingAd() {
     InterstitialAd.load(
-      adUnitId: "ca-app-pub-3940256099942544/1033173712",
+      adUnitId: "ca-app-pub-5525086149175557/3214906418",
       request: AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (ad) {
@@ -208,29 +282,28 @@ class _DashBoardState extends State<DashBoard> {
     );
   }
 
-  late InterstitialAd colorInter;
-
-  void colorLoadingAd() {
-    InterstitialAd.load(
-      adUnitId: "ca-app-pub-3940256099942544/1033173712",
-      request: AdRequest(),
-      adLoadCallback: InterstitialAdLoadCallback(
-        onAdLoaded: (ad) {
-          ad.fullScreenContentCallback = FullScreenContentCallback(
-            onAdDismissedFullScreenContent: (ad) {},
-          );
-          setState(() {
-            colorInter = ad;
-          });
-        },
-        onAdFailedToLoad: (err) {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const ColorsName()));
-          print('Failed to load an interstitial ad: ${err.message}');
-        },
-      ),
-    );
-  }
+  // late InterstitialAd colorInter;
+  // void colorLoadingAd() {
+  //   InterstitialAd.load(
+  //     adUnitId: "ca-app-pub-3940256099942544/1033173712",
+  //     request: AdRequest(),
+  //     adLoadCallback: InterstitialAdLoadCallback(
+  //       onAdLoaded: (ad) {
+  //         ad.fullScreenContentCallback = FullScreenContentCallback(
+  //           onAdDismissedFullScreenContent: (ad) {},
+  //         );
+  //         setState(() {
+  //           colorInter = ad;
+  //         });
+  //       },
+  //       onAdFailedToLoad: (err) {
+  //         Navigator.push(context,
+  //             MaterialPageRoute(builder: (context) => const ColorsName()));
+  //         print('Failed to load an interstitial ad: ${err.message}');
+  //       },
+  //     ),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -350,6 +423,7 @@ class _DashBoardState extends State<DashBoard> {
                           player.stop();
                         });
                         abcReadingInter.show();
+
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -457,12 +531,15 @@ class _DashBoardState extends State<DashBoard> {
                         setState(() {
                           player.stop();
                         });
-                        numberReading.show();
-                        Navigator.push(
+                        aTozInter.show();
+                        Future.delayed(const Duration(seconds: 3), () {
+                          Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>
-                                    const OneTwoThreeReading()));
+                              builder: (context) => const OneTwoThreeReading(),
+                            ),
+                          );
+                        });
                       },
                       child: Padding(
                         padding: const EdgeInsets.only(
@@ -568,9 +645,11 @@ class _DashBoardState extends State<DashBoard> {
                         });
                         aTozInter.show();
                         Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const WordsReading()));
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const WordsReading(),
+                          ),
+                        );
                       },
                       child: Padding(
                         padding: const EdgeInsets.only(
@@ -619,7 +698,7 @@ class _DashBoardState extends State<DashBoard> {
                         setState(() {
                           player.stop();
                         });
-                        colorInter.show();
+                        numberWriting.show();
                         Navigator.push(
                             context,
                             MaterialPageRoute(
