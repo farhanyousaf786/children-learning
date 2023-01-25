@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:children_learning/123Reading/123Reading.dart';
 import 'package:children_learning/123Writing/123Writing.dart';
 import 'package:children_learning/ColorsName/colorsName.dart';
+import 'package:children_learning/Natural%20Screen/NaturalScreen.dart';
 import 'package:children_learning/abcReading/abcReading.dart';
 import 'package:children_learning/abcWriting/abcWriting.dart';
 import 'package:children_learning/wordsReading/wordsReading.dart';
@@ -53,13 +54,37 @@ class _DashBoardState extends State<DashBoard> {
     Future.delayed(const Duration(seconds: 60), () {
       abcReadingInter.show();
     });
-    notify();
+    Future.delayed(const Duration(seconds: 10), () {
+      notify();
+    });
+    Future.delayed(const Duration(seconds: 2), () {
+      neutralScreen();
+    });
+  }
+
+  neutralScreen() async {
+    SharedPreferences? prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey("agree")) {
+      if (prefs.getString("agree") == "true") {
+      } else {
+        NeutralScreen neutralScreen = NeutralScreen();
+
+
+
+      }
+    } else {
+      NeutralScreen neutralScreen = NeutralScreen();
+      neutralScreen.popUp(context);
+    }
   }
 
   notify() async {
     SharedPreferences? prefs = await SharedPreferences.getInstance();
     if (prefs.containsKey("internet")) {
-      print("existssssssssssssssssssssss");
+      if (prefs.getString("internet") == "false") {
+      } else {
+        bottomBar();
+      }
     } else {
       bottomBar();
     }
@@ -118,8 +143,8 @@ class _DashBoardState extends State<DashBoard> {
                     padding: const EdgeInsets.all(12.0),
                     child: ElevatedButton(
                         onPressed: () => {
-
-                        },
+                              neverShowAgain(),
+                            },
                         child: const Text("Never Show Again")),
                   )
                 ],
@@ -129,8 +154,12 @@ class _DashBoardState extends State<DashBoard> {
         });
   }
 
+  neverShowAgain() async {
+    SharedPreferences? prefs = await SharedPreferences.getInstance();
+    prefs.setString("internet", "false");
+    Navigator.pop(context);
+  }
 
-  neverShowAgain(){}
   sayHi() {
     if (hiText) {
       setState(() {
