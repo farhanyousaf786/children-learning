@@ -54,9 +54,7 @@ class _DashBoardState extends State<DashBoard> {
     Future.delayed(const Duration(seconds: 60), () {
       abcReadingInter.show();
     });
-    Future.delayed(const Duration(seconds: 10), () {
-      notify();
-    });
+
     Future.delayed(const Duration(seconds: 2), () {
       neutralScreen();
     });
@@ -66,11 +64,10 @@ class _DashBoardState extends State<DashBoard> {
     SharedPreferences? prefs = await SharedPreferences.getInstance();
     if (prefs.containsKey("agree")) {
       if (prefs.getString("agree") == "true") {
+        notify();
       } else {
         NeutralScreen neutralScreen = NeutralScreen();
-
-
-
+        neutralScreen.mustAgree(context);
       }
     } else {
       NeutralScreen neutralScreen = NeutralScreen();
