@@ -37,12 +37,6 @@ class _DashBoardState extends State<DashBoard> {
     player.play();
     timer = Timer.periodic(
         const Duration(milliseconds: 8500), (Timer t) => sayHi());
-    loadAbcReadingInterAd();
-    loadAbcWritingInterAd();
-    // loadNumberReadingAd();
-    loadNumberWritingAd();
-    AtoZLoadingAd();
-    // colorLoadingAd();
     myBanner.load();
     final AdWidget adWidget = AdWidget(ad: myBanner);
     adContainer = Container(
@@ -172,10 +166,10 @@ class _DashBoardState extends State<DashBoard> {
 
   _launchURL() async {
     if (await canLaunch(
-        "https://sites.google.com/view/childreneducationapp/home")) {
-      await launch("https://sites.google.com/view/childreneducationapp/home");
+        "https://sites.google.com/view/funtolearnbasicabcand123/home?pli=1")) {
+      await launch("https://sites.google.com/view/funtolearnbasicabcand123/home?pli=1");
     } else {
-      throw 'Could not launch ${"https://sites.google.com/view/childreneducationapp/home"}';
+      throw 'Could not launch ${"https://sites.google.com/view/funtolearnbasicabcand123/home?pli=1"}';
     }
   }
 
@@ -209,29 +203,6 @@ class _DashBoardState extends State<DashBoard> {
     );
   }
 
-  late InterstitialAd abcWritingInter;
-
-  void loadAbcWritingInterAd() {
-    InterstitialAd.load(
-      adUnitId: "ca-app-pub-5525086149175557/4527988080",
-      request: AdRequest(),
-      adLoadCallback: InterstitialAdLoadCallback(
-        onAdLoaded: (ad) {
-          ad.fullScreenContentCallback = FullScreenContentCallback(
-            onAdDismissedFullScreenContent: (ad) {},
-          );
-          setState(() {
-            abcWritingInter = ad;
-          });
-        },
-        onAdFailedToLoad: (err) {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const ABCReading()));
-          print('Failed to load an interstitial ad: ${err.message}');
-        },
-      ),
-    );
-  }
 
   // late InterstitialAd numberReading;
   // void loadNumberReadingAd() {
@@ -258,55 +229,8 @@ class _DashBoardState extends State<DashBoard> {
   //   );
   // }
 
-  late InterstitialAd numberWriting;
 
-  void loadNumberWritingAd() {
-    InterstitialAd.load(
-      adUnitId: "ca-app-pub-5525086149175557/6985780408",
-      request: AdRequest(),
-      adLoadCallback: InterstitialAdLoadCallback(
-        onAdLoaded: (ad) {
-          ad.fullScreenContentCallback = FullScreenContentCallback(
-            onAdDismissedFullScreenContent: (ad) {},
-          );
-          setState(() {
-            numberWriting = ad;
-          });
-        },
-        onAdFailedToLoad: (err) {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const OneTwoThreeWriting()));
-          print('Failed to load an interstitial ad: ${err.message}');
-        },
-      ),
-    );
-  }
 
-  late InterstitialAd aTozInter;
-
-  void AtoZLoadingAd() {
-    InterstitialAd.load(
-      adUnitId: "ca-app-pub-5525086149175557/3214906418",
-      request: AdRequest(),
-      adLoadCallback: InterstitialAdLoadCallback(
-        onAdLoaded: (ad) {
-          ad.fullScreenContentCallback = FullScreenContentCallback(
-            onAdDismissedFullScreenContent: (ad) {},
-          );
-          setState(() {
-            aTozInter = ad;
-          });
-        },
-        onAdFailedToLoad: (err) {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const WordsReading()));
-          print('Failed to load an interstitial ad: ${err.message}');
-        },
-      ),
-    );
-  }
 
   // late InterstitialAd colorInter;
   // void colorLoadingAd() {
@@ -448,7 +372,7 @@ class _DashBoardState extends State<DashBoard> {
                         setState(() {
                           player.stop();
                         });
-                        abcReadingInter.show();
+                        // abcReadingInter.show();
 
                         Navigator.push(
                           context,
@@ -504,7 +428,7 @@ class _DashBoardState extends State<DashBoard> {
                         setState(() {
                           player.stop();
                         });
-                        abcWritingInter.show();
+                        // abcWritingInter.show();
                         Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -557,15 +481,14 @@ class _DashBoardState extends State<DashBoard> {
                         setState(() {
                           player.stop();
                         });
-                        aTozInter.show();
-                        Future.delayed(const Duration(seconds: 3), () {
+                        // aTozInter.show();
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => const OneTwoThreeReading(),
                             ),
                           );
-                        });
+
                       },
                       child: Padding(
                         padding: const EdgeInsets.only(
@@ -614,7 +537,7 @@ class _DashBoardState extends State<DashBoard> {
                         setState(() {
                           player.stop();
                         });
-                        numberWriting.show();
+                        // numberWriting.show();
 
                         Navigator.push(
                             context,
@@ -669,7 +592,7 @@ class _DashBoardState extends State<DashBoard> {
                         setState(() {
                           player.stop();
                         });
-                        aTozInter.show();
+                        // aTozInter.show();
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -724,7 +647,7 @@ class _DashBoardState extends State<DashBoard> {
                         setState(() {
                           player.stop();
                         });
-                        numberWriting.show();
+                        // numberWriting.show();
                         Navigator.push(
                             context,
                             MaterialPageRoute(
